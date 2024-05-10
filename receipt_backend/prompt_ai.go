@@ -124,7 +124,11 @@ func getReceiptString(base64Image, textPrompt, apiKey string) (string, error) {
 
 // Organizes openai response into a struct
 func get_receipt_struct(base_encoding, api_key string) (godeeby.Receipt, error) {
-    prompt := `IT IS EXTREMELY IMPORTANT THAT ALL INSTRUCTIONS BE FOLLOWED WITH PRECISION: Given the provided image, give the subtotal, total, tax, date, and tips if they are present (otherwise leave the fields as XXX) in EXACTLY the following format, IF THE TAX IS INLCUDED IN THE SUBTOTAL, SUBTRACT IT FROM THE SUBTOTAL, GIVE NO OTHER RESPONSE BUT THE FOLLOWING: subtotal: XXX, total: XXX, tax: XXX, tips: XXX, date: YEAR/MONTH/DAY`
+    prompt := `IT IS EXTREMELY IMPORTANT THAT ALL INSTRUCTIONS BE FOLLOWED WITH PRECISION: 
+	Given the provided image, give the subtotal, total, tax, date, and tips if they are present 
+	(otherwise leave the fields as XXX) in EXACTLY the following format, IF THE TAX IS INLCUDED 
+	IN THE SUBTOTAL, SUBTRACT IT FROM THE SUBTOTAL, GIVE NO OTHER RESPONSE BUT THE FOLLOWING: 
+	subtotal: XXX, total: XXX, tax: XXX, tips: XXX, date: YEAR/MONTH/DAY`
     
     response_str, err := getReceiptString(base_encoding, prompt, api_key)  
     	if err != nil { return godeeby.Receipt{}, err }
