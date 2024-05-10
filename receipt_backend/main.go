@@ -11,7 +11,7 @@ import (
 	"fmt"
    	"github.com/Yair-Zadok/godeeby"
    	"database/sql"
-    _ "github.com/mattn/go-sqlite3"
+	_ "github.com/mattn/go-sqlite3"
 )
 
 func main() {
