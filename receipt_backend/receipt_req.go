@@ -54,11 +54,11 @@ func post_receipt(receipt_data SalesReceipt) error {
         return errors.New("Realm ID empty")
 	}
 
-    json_data, err := json.Marshal(receipt_data)
-    if err != nil {
-        fmt.Printf("Error marshaling struct: %v\n", err)
-        return err
-    }
+    	json_data, err := json.Marshal(receipt_data)
+    	if err != nil {
+        	fmt.Printf("Error marshaling struct: %v\n", err)
+        	return err
+    	}
 
 	request, err := http.NewRequest("POST", config.OAuthConfig.IntuitAccountingAPIHost+"/v3/company/"+realmId+"/salesreceipt?minorversion=70", bytes.NewBuffer(json_data))
 	if err != nil {
@@ -72,15 +72,15 @@ func post_receipt(receipt_data SalesReceipt) error {
 
 	resp, err := client.Do(request)
 	if err != nil {
-        fmt.Printf("Error: %v", err)
-        return err
-    }
+        	fmt.Printf("Error: %v", err)
+        	return err
+	}
 	
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		log.Fatalln(err)
-        return err
+        	return err
 	}
 
 	responseString := string(body)
