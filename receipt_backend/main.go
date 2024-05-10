@@ -15,10 +15,10 @@ import (
 )
 
 func main() {
-    db, err := sql.Open("sqlite3", "./valid.db")
+	db, err := sql.Open("sqlite3", "./valid.db")
 	if err != nil { fmt.Println(err) }
 	
-    err = godeeby.Setup_db(db)
+	err = godeeby.Setup_db(db)
 	if err != nil { fmt.Println(err) }
 
 
