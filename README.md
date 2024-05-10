@@ -1,6 +1,6 @@
 This is a project made to reduce the time manually spent inputting receipt data, by moving the human from data entry to data validation.
 
-This done by first prompting GPT-4-vision for its opinion of the receipt data, then providing the human with a GUI for data validation which sends off the data to QuickBooks servers.
+This done by first prompting GPT-4-vision for its opinion of the receipt data, then providing the human with a GUI for data validation ensuring correct info is sent to the QuickBooks servers.
  
 -------------------------------------------------------------------------------------
 
