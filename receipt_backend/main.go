@@ -9,8 +9,8 @@ import (
 	"github.com/IntuitDeveloper/OAuth2-Go/config"
 	"github.com/IntuitDeveloper/OAuth2-Go/handlers"
 	"fmt"
-    "github.com/Yair-Zadok/godeeby"
-    "database/sql"
+   	"github.com/Yair-Zadok/godeeby"
+   	"database/sql"
     _ "github.com/mattn/go-sqlite3"
 )
 
