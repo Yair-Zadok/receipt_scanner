@@ -5,7 +5,7 @@ package main
 import (
 	"io/ioutil"
 	"log"
-    	"fmt"
+    "fmt"
    	"net/url"
 	"net/http"
 	"errors"
