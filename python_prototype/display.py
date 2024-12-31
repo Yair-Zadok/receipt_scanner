@@ -7,7 +7,9 @@ from tkinter import messagebox
 import tkinter as tk
 import customtkinter as ctk
 from PIL import Image, ImageTk
+import sys
 
+dir_path = os.path.dirname(sys.executable)
 
 # Section: Data intake from CSV
 class ReceiptData:
@@ -91,8 +93,7 @@ def populate_entries(receipt_data : ReceiptData):
 
 # Handles swapping to next receipt image
 def swap_photo(photo_path : str):
-    current_dir = os.path.dirname(__file__)
-    photo_folder = os.path.join(current_dir, "receipts")
+    photo_folder = os.path.join(dir_path, "receipts")
     photo_path = os.path.join(photo_folder, photo_path)
     
     right_frame.update()
@@ -109,7 +110,7 @@ def swap_photo(photo_path : str):
         height = frame_height
         width = height * aspect_ratio
     
-    photo = photo.resize((int(width), int(height)), Image.ANTIALIAS)
+    photo = photo.resize((int(width), int(height)), Image.Resampling.LANCZOS)
 
     tk_photo = ImageTk.PhotoImage(photo)
     
@@ -141,8 +142,7 @@ def save_data():
         csv_data = convert_entries_to_csv(csv_data)
         supplier_entry.update()
         print(supplier_entry.get())
-        current_dir = os.path.dirname(__file__)
-        output_path = os.path.join(current_dir, "output.csv")
+        output_path = os.path.join(dir_path, "output.csv")
         save_csv(csv_data, output_path)
 
     except Exception as ed:
@@ -174,11 +174,7 @@ def load_first(receipt_data_list : list[ReceiptData]):
 
 
 
-# Changing the directory to be compatible with an executable
-dir_path = os.path.dirname(os.path.realpath(__file__))
-os.chdir(dir_path)
-
-receipts_csv_path = 'data_intake.csv'
+receipts_csv_path = os.path.join(dir_path, 'data_intake.csv')
 receipt_data_list = read_receipt_csv(receipts_csv_path)
 
 
