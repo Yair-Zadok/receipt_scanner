@@ -1,22 +1,22 @@
 # Copyright 2024, Yair Zadok, All rights reserved.
 
-import base64
-import requests
+import sys
 import csv
 import os
 from PIL import Image
 from pdf2image import convert_from_path
-import pandas as pd
-
+import base64
+from openai import OpenAI
 
 api_key = ""
+client = OpenAI(api_key=api_key)
 
 # General information prompt
 text_prompt = r"""IT IS EXTREMELY IMPORTANT THAT ALL INSTRUCTIONS BE FOLLOWED WITH PRECISION: 
 Given the provided image, give the subtotal, total, tax, date, and tips if they are present 
-(otherwise leave the fields as XXX) in EXACTLY the following format, 
+(otherwise leave the fields as 0) in EXACTLY the following format, 
 IF THE TAX IS INLCUDED IN THE SUBTOTAL, SUBTRACT IT FROM THE SUBTOTAL, GIVE NO OTHER RESPONSE BUT THE FOLLOWING: 
-subtotal: XXX, total: XXX, tax: XXX, tips: XXX date: YEAR/MONTH/DAY
+subtotal: XXX, total: XXX, tax: XXX, tips: XXX, date: YEAR/MONTH/DAY
 """
 
 # Prompt for matching to expense category
@@ -39,47 +39,45 @@ and return it in exactly the same format, capitalization, and spacing, for examp
 """
 
 
-# Gives a base64 encoding of an image
-def encode_image(image_path : str) -> str:
+def encode_image(image_path: str) -> str:
+    """Encodes an image to a base64 string."""
     with open(image_path, "rb") as image_file:
-        return base64.b64encode(image_file.read()).decode('utf-8')
+        return base64.b64encode(image_file.read()).decode("utf-8")
 
 
-# Retrieves a string response according to a text prompt and image path
-def get_receipt_string(image_path : str, text_prompt : str, api_key : str) -> str:
+def get_receipt_string(image_path: str, text_prompt: str, api_key: str) -> str:
     base64_image = encode_image(image_path)
+    try:
+        response = client.chat.completions.create(
+            model="gpt-4o",
+            messages=[
+                {
+                    "role": "user",
+                    "content": [
+                        {
+                            "type": "text",
+                            "text": text_prompt,
+                        },
+                        {
+                            "type": "image_url",
+                            "image_url": {"url": f"data:image/jpeg;base64,{base64_image}",
+                                          "detail": "high",},
+                        },
+                    ],
+                }
+            ],
+        )
+        completion = response.choices[0].message.content.strip()
+        print(completion)
+        return completion
 
-    headers = {
-      "Content-Type": "application/json",
-      "Authorization": f"Bearer {api_key}"
-    }
+    except Exception as e:
+        print(f"An error occurred in calling api: {e}")
+        return "Error: Failed to retrieve a response."
 
-    payload = {
-      "model": "gpt-4-vision-preview",
-      "messages": [
-        {
-          "role": "user",
-          "content": [
-            {
-              "type": "text",
-              "text": f"{text_prompt}"
-            },
-            {
-              "type": "image_url",
-              "image_url": {
-                "url": f"data:image/jpeg;base64,{base64_image}"
-              }
-            }
-          ]
-        }
-      ],
-      "max_tokens": 100
-    }
-    
-    response = requests.post("https://api.openai.com/v1/chat/completions", headers=headers, json=payload)
-    response_data = response.json()
-    completion = response_data['choices'][0]['message']['content']
-    return completion
+
+
+
 
 
 class ReceiptData:
@@ -96,7 +94,6 @@ def convert_string_to_receipt_data(data_string : str) -> ReceiptData:
     try:
         data_string = data_string.replace('$', '')
         data_string = data_string.lower()
-        data_string = data_string.replace('xxx', '0')
         data_parts = data_string.split(', ')
         subtotal = data_parts[0].split(': ')[1]
         total = data_parts[1].split(': ')[1]
@@ -105,7 +102,7 @@ def convert_string_to_receipt_data(data_string : str) -> ReceiptData:
         date = data_parts[4].split(': ')[1]
         return ReceiptData(subtotal, total, tax, tips, date)
     except Exception as e:
-        print("An error occurred:", str(e))
+        print("An error occurred in parsing response:", str(e))
         return ReceiptData("FAILED", "FAILED", "FAILED", "FAILED", "FAILED")
     
 
@@ -144,7 +141,7 @@ def concatenate_images_vertically(images):
     return concatenated_image
 
 
-def scan_folder(folder_path : str, poppler_path : str, api_key : str):
+def scan_folder(folder_path : str, poppler_path : str, text_prompt : str, api_key : str):
     file_list = os.listdir(folder_path)
     csv_data = []
     
@@ -184,10 +181,11 @@ def scan_folder(folder_path : str, poppler_path : str, api_key : str):
             
     return csv_data
 
-current_dir = os.path.dirname(__file__)
+current_dir = os.path.dirname(sys.executable)
+
 folder_path = os.path.join(current_dir, "receipts")
 output_path = os.path.join(current_dir, "data_intake.csv")
-
-poppler_path = r"POPPLER_PATH\Library\bin"
+poppler_path = r"poppler-23.07.0/Library/bin"
 csv_data = scan_folder(folder_path, poppler_path, text_prompt, api_key)
 save_csv(csv_data, output_path)
+
